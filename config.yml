@@ -1,0 +1,23 @@
+sz002401:
+  - buy_price: 13.190
+    user_name: "hai046"
+    alert_up: 15
+    alert_down: 12
+    alert_msg:
+      wechat: 1a0a39b1-5c97-4b0b-92e4-c8ca3261d041
+      content: "你设置的警戒线到了"
+  - buy_price: 13.190
+    user_name: "haizhu"
+    alert_up: 15
+    alert_down: 12
+    alert_msg:
+      wechat: 1a0a39b1-5c97-4b0b-92e4-c8ca3261d041
+      content: "你设置的警戒线到了"
+sh588000:
+  - buy_price: 1.440
+    user_name: "hai046"
+    alert_up: 1.5
+    alert_down: 1.3
+    alert_msg:
+      wechat: 1a0a39b1-5c97-4b0b-92e4-c8ca3261d041
+      content: "你设置的警戒线到了"
