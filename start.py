@@ -4,10 +4,13 @@ import codecs
 
 import requests
 import yaml
+import datetime
 
 
 class Shares:
+
     def __init__(self, conf='config.yml'):
+
         with codecs.open(conf, 'r', 'utf-8') as fp:
             config = yaml.safe_load_all(fp.read())
             self.config = config
@@ -78,6 +81,7 @@ class Shares:
         for title in titles:
             msg += "%s：\t%s\n" % (title, param[index])
             index += 1
+        today = datetime.datetime.now().strftime('%H%M')
 
         for conf in configs:
             alert_up = conf['alert_up']
@@ -88,6 +92,11 @@ class Shares:
                 self.__send_msg(conf,
                                 '## 股票：%s[%s]\n<font color="info">已经跌到你的设置的\n警戒线：%s\n当前价格：%s\n购买价格：%s</font>\n> ' % (
                                     name, id, alert_down, 当前价格, conf['buy_price']) + msg)
+
+            if today == '0900' or today == '1500':
+                buy_price = conf['buy_price']
+                self.__send_msg(conf, "## 每日提示 购买价：%s，当前价：%s，收益率：%.2f%%\n%s" % (
+                buy_price, 当前价格, 100 * (当前价格 - buy_price) / buy_price, msg))
         pass
 
     def __send_msg(self, conf, msg):
