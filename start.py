@@ -1,10 +1,10 @@
 #!/usr/bin/python
 # -*- coding: UTF-8 -*-
 import codecs
+import datetime
 
 import requests
 import yaml
-import datetime
 
 
 class Shares:
@@ -93,10 +93,10 @@ class Shares:
                                 '## 股票：%s[%s]\n<font color="info">已经跌到你的设置的\n警戒线：%s\n当前价格：%s\n购买价格：%s</font>\n> ' % (
                                     name, id, alert_down, 当前价格, conf['buy_price']) + msg)
 
-            if today == '0900' or today == '1500':
+            if today == '1500' or today == '0901':
                 buy_price = conf['buy_price']
                 self.__send_msg(conf, "## 每日提示 购买价：%s，当前价：%s，收益率：%.2f%%\n%s" % (
-                buy_price, 当前价格, 100 * (当前价格 - buy_price) / buy_price, msg))
+                    buy_price, 当前价格, 100 * (当前价格 - buy_price) / buy_price, msg))
         pass
 
     def __send_msg(self, conf, msg):
