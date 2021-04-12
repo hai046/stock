@@ -31,6 +31,7 @@ class Shares:
             return
         content = response.text.split('"')[1]
         print(content)
+
         self.__parse(content.split(','), conf, id)
 
     def __parse(self, param, configs, id):
@@ -60,7 +61,6 @@ class Shares:
         # (22, 23), (24, 25), (26,27), (28, 29)分别为“卖二”至“卖四的情况”
         # 30：”2008-01-11″，日期；
         # 31：”15:05:32″，时间；
-        print(len(param))
         name = param[0]
         当前价格 = float(param[3])
         titles = ['名字',
@@ -90,22 +90,28 @@ class Shares:
         print(url)
         msg += "\n\n[更多](%s)" % url
         for conf in configs:
-            alert_up = conf['alert_up']
-            alert_down = conf['alert_down']
-            if 当前价格 >= alert_up:
-                self.__send_msg(conf, '## 股票：%s[%s]\n<font color="warning">涨了，涨了，涨了</font>\n> ' % (name, id) + msg)
-                self.__parse_img(url, conf)
-            elif 当前价格 < alert_down:
-                self.__send_msg(conf,
-                                '## 股票：%s[%s]\n<font color="info">已经跌到你的设置的\n警戒线：%s\n当前价格：%s\n购买价格：%s</font>\n> ' % (
-                                    name, id, alert_down, 当前价格, conf['buy_price']) + msg)
-                self.__parse_img(url, conf)
+            if 'want_buy_price' in conf:
+                want_buy_price = conf['want_buy_price']
+                if 当前价格 <= want_buy_price :
+                    self.__send_msg(conf, " ## 提示:%s  \n> 名字：%s\n编号：%s\n当前价格：%s\n期望价格：%s" % (
+                        conf['alert_msg']['content'], name, id, 当前价格, want_buy_price))
+            else:
+                alert_up = conf['alert_up']
+                alert_down = conf['alert_down']
+                if 当前价格 >= alert_up:
+                    self.__send_msg(conf, '## 股票：%s[%s]\n<font color="warning">涨了，涨了，涨了</font>\n> ' % (name, id) + msg)
+                    self.__parse_img(url, conf)
+                elif 当前价格 < alert_down:
+                    self.__send_msg(conf,
+                                    '## 股票：%s[%s]\n<font color="info">已经跌到你的设置的\n警戒线：%s\n当前价格：%s\n购买价格：%s</font>\n> ' % (
+                                        name, id, alert_down, 当前价格, conf['buy_price']) + msg)
+                    self.__parse_img(url, conf)
 
-            if today == '1500' or today == '0930' or today == '1130':
-                buy_price = conf['buy_price']
-                self.__send_msg(conf, "## 每日提示 购买价：%s，当前价：%s，收益率：%.2f%%\n%s" % (
-                    buy_price, 当前价格, 100 * (当前价格 - buy_price) / buy_price, msg))
-                self.__parse_img(url, conf)
+                if today == '1500' or today == '0930' or today == '1130':
+                    buy_price = conf['buy_price']
+                    self.__send_msg(conf, "## 每日提示 购买价：%s，当前价：%s，收益率：%.2f%%\n%s" % (
+                        buy_price, 当前价格, 100 * (当前价格 - buy_price) / buy_price, msg))
+                    self.__parse_img(url, conf)
         pass
 
     def __send_msg(self, conf, msg):

@@ -14,3 +14,8 @@ sh588000:
     alert_msg:
       wechat: 1a0a39b1-5c97-4b0b-92e4-c8ca3261d041
       content: "你设置的警戒线到了"
+sz000725:
+  - want_buy_price: 6.1
+    alert_msg:
+      wechat: 1a0a39b1-5c97-4b0b-92e4-c8ca3261d041
+      content: "已经到了你心目中价位了"
