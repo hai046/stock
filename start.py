@@ -1,16 +1,19 @@
 #!/usr/bin/python
 # -*- coding: UTF-8 -*-
+import base64
 import codecs
 import datetime
+import hashlib
 
 import requests
 import yaml
+from selenium.common.exceptions import NoSuchElementException
 
 
 class Shares:
 
     def __init__(self, conf='config.yml'):
-
+        self.driver = None
         with codecs.open(conf, 'r', 'utf-8') as fp:
             config = yaml.safe_load_all(fp.read())
             self.config = config
@@ -82,25 +85,30 @@ class Shares:
             msg += "%s：\t%s\n" % (title, param[index])
             index += 1
         today = datetime.datetime.now().strftime('%H%M')
-        msg += "\n\n[更多](https://biz.finance.sina.com.cn/suggest/lookup_n.php?country=11&q=%s)" % id
+
+        url = 'https://biz.finance.sina.com.cn/suggest/lookup_n.php?country=11&q=%s' % id
+        print(url)
+        msg += "\n\n[更多](%s)" % url
         for conf in configs:
             alert_up = conf['alert_up']
             alert_down = conf['alert_down']
             if 当前价格 >= alert_up:
                 self.__send_msg(conf, '## 股票：%s[%s]\n<font color="warning">涨了，涨了，涨了</font>\n> ' % (name, id) + msg)
+                self.__parse_img(url, conf)
             elif 当前价格 < alert_down:
                 self.__send_msg(conf,
                                 '## 股票：%s[%s]\n<font color="info">已经跌到你的设置的\n警戒线：%s\n当前价格：%s\n购买价格：%s</font>\n> ' % (
                                     name, id, alert_down, 当前价格, conf['buy_price']) + msg)
+                self.__parse_img(url, conf)
 
-            if today == '1500' or today == '0930':
+            if today == '1500' or today == '0930' or True:
                 buy_price = conf['buy_price']
                 self.__send_msg(conf, "## 每日提示 购买价：%s，当前价：%s，收益率：%.2f%%\n%s" % (
                     buy_price, 当前价格, 100 * (当前价格 - buy_price) / buy_price, msg))
+                self.__parse_img(url, conf)
         pass
 
     def __send_msg(self, conf, msg):
-        print(msg)
         requests.post(url='https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=%s' % conf['alert_msg']['wechat'],
                       json={
                           "msgtype": "markdown",
@@ -108,6 +116,57 @@ class Shares:
                               "content": msg,
                           }
                       })
+
+    def __parse_img(self, url, conf, show=False):
+        from selenium import webdriver
+
+        if self.driver is None:
+            options = webdriver.ChromeOptions()
+            if not show:
+                options.add_argument('headless')  # 设置不显示页面
+            options.add_argument("--disable-blink-features=AutomationControlled")
+            # mobileEmulation = {'deviceName': 'iPhone 6/7/8'}  # 设置手机环境
+            # options.add_experimental_option('mobileEmulation', mobileEmulation)
+            self.driver = webdriver.Chrome(chrome_options=options)
+        self.driver.get(url)
+        try:
+            div = self.driver.find_element_by_xpath('/html/body/div[7]/div[3]/div[1]/div[1]/div[11]/div[1]/div')
+            self.__send_img(conf, div.screenshot_as_png)
+
+            # 日K
+            self.driver.find_element_by_xpath(
+                '/html/body/div[7]/div[3]/div[1]/div[1]/div[11]/div[1]/div/div[2]/div[1]/div/div[5]').click()
+            div = self.driver.find_element_by_xpath('/html/body/div[7]/div[3]/div[1]/div[1]/div[11]/div[1]/div')
+            self.__send_img(conf, div.screenshot_as_png)
+        except NoSuchElementException as e:
+            # ETF 分时
+            div = self.driver.find_element_by_xpath('/html/body/div[6]/div[1]/div/div[7]/div/div[1]/div')
+            self.__send_img(conf, div.screenshot_as_png)
+            # 日K
+            self.driver.find_element_by_xpath(
+                '/html/body/div[6]/div[1]/div/div[7]/div/div[1]/div/div[3]/div/span[3]').click()
+            div = self.driver.find_element_by_xpath('/html/body/div[6]/div[1]/div/div[7]/div/div[1]/div')
+            self.__send_img(conf, div.screenshot_as_png)
+
+    pass
+
+    def __del__(self):
+        if self.driver is not None:
+            self.driver.close()
+
+    def __send_img(self, conf, binbody):
+        msg = base64.b64encode(binbody)
+        md5 = hashlib.md5(binbody).hexdigest()
+        requests.post(url='https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=%s' % conf['alert_msg']['wechat'],
+                      json={
+                          "msgtype": "image",
+                          "image": {
+                              "base64": str(msg, 'utf-8'),
+                              "md5": md5
+                          }
+                      }
+                      )
+        pass
 
 
 if __name__ == '__main__':
