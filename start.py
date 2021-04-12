@@ -101,7 +101,7 @@ class Shares:
                                     name, id, alert_down, 当前价格, conf['buy_price']) + msg)
                 self.__parse_img(url, conf)
 
-            if today == '1500' or today == '0930' or True:
+            if today == '1500' or today == '0930' or today == '1130':
                 buy_price = conf['buy_price']
                 self.__send_msg(conf, "## 每日提示 购买价：%s，当前价：%s，收益率：%.2f%%\n%s" % (
                     buy_price, 当前价格, 100 * (当前价格 - buy_price) / buy_price, msg))
