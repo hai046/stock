@@ -124,7 +124,10 @@ class Shares:
             options = webdriver.ChromeOptions()
             if not show:
                 options.add_argument('headless')  # 设置不显示页面
+                options.add_argument('--disable-dev-shm-usage')
             options.add_argument("--disable-blink-features=AutomationControlled")
+            options.add_argument('blink-settings=imagesEnabled=false')
+            options.add_argument('--disable-gpu')
             # mobileEmulation = {'deviceName': 'iPhone 6/7/8'}  # 设置手机环境
             # options.add_experimental_option('mobileEmulation', mobileEmulation)
             self.driver = webdriver.Chrome(chrome_options=options)
