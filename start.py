@@ -108,7 +108,7 @@ class Shares:
                                         name, id, alert_down, 当前价格, conf['buy_price']) + msg)
                     self.__parse_img(url, conf)
 
-                if self.today == '1500' or self.today == '0930' or self.today == '1130':
+                if self.today == '1516' or self.today == '0930' or self.today == '1130':
                     buy_price = conf['buy_price']
                     self.__send_msg(conf, "## 每日提示 购买价：%s，当前价：%s，收益率：%.2f%%\n%s" % (
                         buy_price, 当前价格, 100 * (当前价格 - buy_price) / buy_price, msg))
@@ -132,8 +132,8 @@ class Shares:
             if not show:
                 options.add_argument('headless')  # 设置不显示页面
                 options.add_argument('--disable-dev-shm-usage')
-            options.add_argument("--disable-blink-features=AutomationControlled")
-            options.add_argument('blink-settings=imagesEnabled=false')
+            # options.add_argument("--disable-blink-features=AutomationControlled")
+            # options.add_argument('blink-settings=imagesEnabled=false')
             options.add_argument('--no-sandbox')
             # options.add_argument('--disable-gpu')
             # mobileEmulation = {'deviceName': 'iPhone 6/7/8'}  # 设置手机环境
