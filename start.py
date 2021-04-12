@@ -14,6 +14,7 @@ class Shares:
 
     def __init__(self, conf='config.yml'):
         self.driver = None
+        self.today = datetime.datetime.now().strftime('%H%M')
         with codecs.open(conf, 'r', 'utf-8') as fp:
             config = yaml.safe_load_all(fp.read())
             self.config = config
@@ -84,7 +85,7 @@ class Shares:
         for title in titles:
             msg += "%s：\t%s\n" % (title, param[index])
             index += 1
-        today = datetime.datetime.now().strftime('%H%M')
+
 
         url = 'https://biz.finance.sina.com.cn/suggest/lookup_n.php?country=11&q=%s' % id
         print(url)
@@ -107,7 +108,7 @@ class Shares:
                                         name, id, alert_down, 当前价格, conf['buy_price']) + msg)
                     self.__parse_img(url, conf)
 
-                if today == '1500' or today == '0930' or today == '1130':
+                if self.today == '1500' or self.today == '0930' or self.today == '1130':
                     buy_price = conf['buy_price']
                     self.__send_msg(conf, "## 每日提示 购买价：%s，当前价：%s，收益率：%.2f%%\n%s" % (
                         buy_price, 当前价格, 100 * (当前价格 - buy_price) / buy_price, msg))
