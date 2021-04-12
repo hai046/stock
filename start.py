@@ -76,13 +76,13 @@ class Shares:
         date = param[30]
         time = param[31]
         # print(name, date, time)
-        msg = ''
+        msg = '> '
         index = 0
         for title in titles:
             msg += "%s：\t%s\n" % (title, param[index])
             index += 1
         today = datetime.datetime.now().strftime('%H%M')
-        msg += "\n [更多](https://biz.finance.sina.com.cn/suggest/lookup_n.php?country=11&q=%s)" % id
+        msg += "\n\n[更多](https://biz.finance.sina.com.cn/suggest/lookup_n.php?country=11&q=%s)" % id
         for conf in configs:
             alert_up = conf['alert_up']
             alert_down = conf['alert_down']
@@ -100,6 +100,7 @@ class Shares:
         pass
 
     def __send_msg(self, conf, msg):
+        print(msg)
         requests.post(url='https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=%s' % conf['alert_msg']['wechat'],
                       json={
                           "msgtype": "markdown",
