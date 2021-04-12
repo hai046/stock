@@ -66,10 +66,10 @@ class Shares:
                   '当前价格',
                   '今日最高价',
                   '今日最低价',
-                  '竞买价',
-                  '竞卖价',
-                  '成交的股票数',  # 由于股票交易以一百股为基本单位，所以在使用时，通常把该值除以一百；
-                  '成交金额',  # 单位为“元”，为了一目了然，通常以“万元”为成交金额的单位，所以通常把该值除以一万；
+                  # '竞买价',
+                  # '竞卖价',
+                  # '成交的股票数',  # 由于股票交易以一百股为基本单位，所以在使用时，通常把该值除以一百；
+                  # '成交金额',  # 单位为“元”，为了一目了然，通常以“万元”为成交金额的单位，所以通常把该值除以一万；
                   # '买一数量',  # 买一手至少有多少，一般是100股
                   # '买一报价'
                   ]
@@ -82,7 +82,7 @@ class Shares:
             msg += "%s：\t%s\n" % (title, param[index])
             index += 1
         today = datetime.datetime.now().strftime('%H%M')
-
+        msg += "\n [更多](https://biz.finance.sina.com.cn/suggest/lookup_n.php?country=11&q=%s)" % id
         for conf in configs:
             alert_up = conf['alert_up']
             alert_down = conf['alert_down']
