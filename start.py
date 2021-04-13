@@ -168,7 +168,7 @@ class Shares:
             # 日K
             self.driver.find_element_by_xpath(
                 '/html/body/div[7]/div[3]/div[1]/div[1]/div[11]/div[1]/div/div[2]/div[1]/div/div[5]').click()
-            time.sleep(3)
+            time.sleep(5)
             div = self.driver.find_element_by_xpath('/html/body/div[7]/div[3]/div[1]/div[1]/div[11]/div[1]/div')
             self.__send_img(conf, div.screenshot_as_png)
         except NoSuchElementException as e:
@@ -178,7 +178,7 @@ class Shares:
             # 日K
             self.driver.find_element_by_xpath(
                 '/html/body/div[6]/div[1]/div/div[7]/div/div[1]/div/div[3]/div/span[3]').click()
-            time.sleep(3)
+            time.sleep(5)
             div = self.driver.find_element_by_xpath('/html/body/div[6]/div[1]/div/div[7]/div/div[1]/div')
             self.__send_img(conf, div.screenshot_as_png)
 
