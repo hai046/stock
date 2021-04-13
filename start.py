@@ -4,6 +4,9 @@ import base64
 import codecs
 import datetime
 import hashlib
+import json
+import os
+import time
 
 import requests
 import yaml
@@ -86,36 +89,53 @@ class Shares:
             msg += "%s：\t%s\n" % (title, param[index])
             index += 1
 
-
         url = 'https://biz.finance.sina.com.cn/suggest/lookup_n.php?country=11&q=%s' % id
         print(url)
         msg += "\n\n[更多](%s)" % url
         for conf in configs:
             if 'want_buy_price' in conf:
                 want_buy_price = conf['want_buy_price']
-                if 当前价格 <= want_buy_price :
-                    self.__send_msg(conf, " ## 提示:%s  \n> 名字：%s\n编号：%s\n当前价格：%s\n期望价格：%s" % (
-                        conf['alert_msg']['content'], name, id, 当前价格, want_buy_price))
+                if 当前价格 <= want_buy_price:
+                    if self.__send_msg(conf, " ## 提示:%s  \n> 名字：%s\n编号：%s\n当前价格：%s\n期望价格：%s" % (
+                            conf['alert_msg']['content'], name, id, 当前价格, want_buy_price)):
+                        self.__parse_img(url, conf)
             else:
                 alert_up = conf['alert_up']
                 alert_down = conf['alert_down']
                 if 当前价格 >= alert_up:
-                    self.__send_msg(conf, '## 股票：%s[%s]\n<font color="warning">涨了，涨了，涨了</font>\n> ' % (name, id) + msg)
-                    self.__parse_img(url, conf)
+                    if self.__send_msg(conf, '## 股票：%s[%s]\n<font color="warning">涨了，涨了，涨了</font>\n> ' % (
+                            name, id) + msg):
+                        self.__parse_img(url, conf)
                 elif 当前价格 < alert_down:
-                    self.__send_msg(conf,
-                                    '## 股票：%s[%s]\n<font color="info">已经跌到你的设置的\n警戒线：%s\n当前价格：%s\n购买价格：%s</font>\n> ' % (
-                                        name, id, alert_down, 当前价格, conf['buy_price']) + msg)
-                    self.__parse_img(url, conf)
+                    if self.__send_msg(conf,
+                                       '## 股票：%s[%s]\n<font color="info">已经跌到你的设置的\n警戒线：%s\n当前价格：%s\n购买价格：%s</font>\n> ' % (
+                                               name, id, alert_down, 当前价格, conf['buy_price']) + msg):
+                        self.__parse_img(url, conf)
 
                 if self.today == '1516' or self.today == '0930' or self.today == '1130':
                     buy_price = conf['buy_price']
-                    self.__send_msg(conf, "## 每日提示 购买价：%s，当前价：%s，收益率：%.2f%%\n%s" % (
-                        buy_price, 当前价格, 100 * (当前价格 - buy_price) / buy_price, msg))
-                    self.__parse_img(url, conf)
+                    if self.__send_msg(conf, "## 每日提示 购买价：%s，当前价：%s，收益率：%.2f%%\n%s" % (
+                            buy_price, 当前价格, 100 * (当前价格 - buy_price) / buy_price, msg)):
+                        self.__parse_img(url, conf)
         pass
 
+    def __sameAsLastTime(self, dic):
+        cache = '.cache.json'
+        content = ''
+        current_content = json.dumps(dic)
+        if os.path.exists(cache):
+            with open(cache) as f:
+                content = f.read()
+                if current_content == content:
+                    return True
+
+        with open(cache, "w") as f:
+            f.write(content)
+        return False
+
     def __send_msg(self, conf, msg):
+        if self.__sameAsLastTime({"conf": conf, "msg": msg}):
+            return False
         requests.post(url='https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=%s' % conf['alert_msg']['wechat'],
                       json={
                           "msgtype": "markdown",
@@ -123,6 +143,7 @@ class Shares:
                               "content": msg,
                           }
                       })
+        return True
 
     def __parse_img(self, url, conf, show=False):
         from selenium import webdriver
@@ -147,6 +168,7 @@ class Shares:
             # 日K
             self.driver.find_element_by_xpath(
                 '/html/body/div[7]/div[3]/div[1]/div[1]/div[11]/div[1]/div/div[2]/div[1]/div/div[5]').click()
+            time.sleep(3)
             div = self.driver.find_element_by_xpath('/html/body/div[7]/div[3]/div[1]/div[1]/div[11]/div[1]/div')
             self.__send_img(conf, div.screenshot_as_png)
         except NoSuchElementException as e:
@@ -156,6 +178,7 @@ class Shares:
             # 日K
             self.driver.find_element_by_xpath(
                 '/html/body/div[6]/div[1]/div/div[7]/div/div[1]/div/div[3]/div/span[3]').click()
+            time.sleep(3)
             div = self.driver.find_element_by_xpath('/html/body/div[6]/div[1]/div/div[7]/div/div[1]/div')
             self.__send_img(conf, div.screenshot_as_png)
 
