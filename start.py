@@ -121,16 +121,15 @@ class Shares:
 
     def __sameAsLastTime(self, dic):
         cache = '.cache.json'
-        content = ''
-        current_content = json.dumps(dic)
+        current_content = json.dumps(dic, ensure_ascii=False)
         if os.path.exists(cache):
             with open(cache) as f:
                 content = f.read()
-                if current_content == content:
+                if current_content is content:
                     return True
 
         with open(cache, "w") as f:
-            f.write(content)
+            f.write(current_content)
         return False
 
     def __send_msg(self, conf, msg):
@@ -200,6 +199,18 @@ class Shares:
                           }
                       }
                       )
+        pass
+
+    def __equals(self, current_content, content):
+        if len(current_content) == len(content):
+            index = 0
+            while index < len(current_content):
+                if current_content[index] is not content[index]:
+                    print(index, current_content[index], content[index])
+                    return False
+                index += 1
+            return True
+        return False
         pass
 
 
