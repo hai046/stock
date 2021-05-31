@@ -5,6 +5,13 @@ sz002401:
     alert_msg:
       wechat: 51945312-81f3-4cb7-bc09-c685e5783c61
       content: "你设置的警戒线到了"
+sh601816:
+  - buy_price: 5.868
+    alert_up: 5
+    alert_down: 6.5
+    alert_msg:
+      wechat: 51945312-81f3-4cb7-bc09-c685e5783c61
+      content: "你设置的警戒线到了"
 sh588000:
   - buy_price: 1.440
     alert_up: 1.5
@@ -13,7 +20,7 @@ sh588000:
       wechat: 51945312-81f3-4cb7-bc09-c685e5783c61
       content: "你设置的警戒线到了"
 sz000725:
-  - buy_price: 6.55
+  - buy_price: 6.383
     alert_up: 8.00
     alert_down: 6
     alert_msg:

@@ -7,7 +7,7 @@ import requests
 
 
 class Eastmoney:
-
+    # http://datapc.eastmoney.com/emdatacenter/JGCC/Index?color=w&type=jjin
     def __init__(self):
         self.__con = sqlite3.connect('eastmoney.db')
         self.__cur = self.__con.cursor()
@@ -50,6 +50,8 @@ class Eastmoney:
             ''')
 
         self.__con.commit()
+        self.count = 0
+        self.__select_date = 0
 
     def __del__(self):
         self.__con.commit()
@@ -68,7 +70,7 @@ class Eastmoney:
         list = json.loads(response.content)
         print(list)
         if len(list) > 0:
-            return list[0]
+            return list[self.__select_date]
 
         return None
         pass
@@ -78,24 +80,24 @@ class Eastmoney:
             return
         url = 'http://datapc.eastmoney.com/emdatacenter/jgcc/list?fd=%s&stat=1&st=2&sr=-1&p=%s&ps=50&cmd=1' % (
             fd, page)
-        print(url)
+        print(url, page)
         response = requests.get(url)
         if response.status_code != 200:
             print("request url=", url + "  err", response.status_code)
             return
         payload = json.loads(response.content)
         self.__cur.execute("")
-        print(url)
         for item in payload['data']:
             sql = "insert  into  eastmoney_list(`code`,`name`,`holder_company_num`,`holder_sum`,`holder_value`,`type`,`change_value`,`change_rate`,`change_date` )" \
                   "values ({0[0]},'{0[1]}',{0[2]},{0[3]},{0[4]},'{0[5]}',{0[6]},{0[7]},{0[8]}) ;".format(
                 item)
-            print(sql)
             try:
                 self.__cur.execute(sql)
-                self.__detail(item[0], item[8])
+                print(sql)
             except sqlite3.IntegrityError as e:
-                continue
+                e
+                # continue
+            self.__detail(item[0], item[8])
             self.__con.commit()
 
         if page < payload['pages']:
@@ -105,8 +107,9 @@ class Eastmoney:
     pass
 
     def __detail(self, code, date, page=1):
+        self.count += 1
         url = "http://datapc.eastmoney.com/emdatacenter/JGCC/getHoldDetail"
-        response = requests.post(url, data={
+        data = {
             'stat': 0,
             'scode': '',
             'code': code,
@@ -115,39 +118,49 @@ class Eastmoney:
             'sr': -1,
             'pageIndex': page,
             'pageSize': 30,
-        })
+        }
+        response = requests.post(url, data=data)
+        print(url, json.dumps(data), self.count)
         if response.status_code != 200:
             print("request url=", url + "  err", response.status_code)
             return
-        payload = json.loads(response.content)
+        try:
+            payload = json.loads(response.content)
+        except:
+            print(response.content)
+            print(data)
+            return
 
-        for item in payload['data']:
-            sql = "insert into     eastmoney_holder_detail (indtCode, instSName, rDate,sCode,code,sHCode ,sHName,SName,shareHDNum ,tabProRate,tabRate , `type`,typeCode ,vposition)" \
-                  "values ('{0[0]}','{0[1]}','{0[2]}','{0[3]}','{1}','{0[4]}','{0[5]}','{0[6]}',{0[7]},{0[8]},{0[9]},'{0[10]}',{0[11]},{0[12]}) "
-            json_items = ["IndtCode",
-                          "InstSName",
-                          "RDate",
-                          "SCode",
-                          "SHCode",
-                          "SHName",
-                          "SName",
-                          "ShareHDNum",
-                          "TabProRate",
-                          "TabRate",
-                          "Type",
-                          "TypeCode",
-                          "Vposition"
-                          ]
+        if 'data' in payload:
+            for item in payload['data']:
+                sql = "insert into     eastmoney_holder_detail (indtCode, instSName, rDate,sCode,code,sHCode ,sHName,SName,shareHDNum ,tabProRate,tabRate , `type`,typeCode ,vposition)" \
+                      "values ('{0[0]}','{0[1]}','{0[2]}','{0[3]}','{1}','{0[4]}','{0[5]}','{0[6]}',{0[7]},{0[8]},{0[9]},'{0[10]}',{0[11]},{0[12]}) "
+                json_items = ["IndtCode",
+                              "InstSName",
+                              "RDate",
+                              "SCode",
+                              "SHCode",
+                              "SHName",
+                              "SName",
+                              "ShareHDNum",
+                              "TabProRate",
+                              "TabRate",
+                              "Type",
+                              "TypeCode",
+                              "Vposition"
+                              ]
 
-            values = []
-            for name in json_items:
-                values.append(item[name])
-            sql = sql.format(values, str(item['SCode']).split(".")[0])
-            # print(sql)
-            try:
-                self.__cur.execute(sql)
-            except sqlite3.IntegrityError as e:
-                print()
+                values = []
+                for name in json_items:
+                    values.append(item[name])
+                sql = sql.format(values, str(item['SCode']).split(".")[0])
+                # print(sql)
+                try:
+                    self.__cur.execute(sql)
+                except sqlite3.IntegrityError as e:
+                    e
+                except sqlite3.OperationalError as e:
+                    print(e)
 
         if page < payload['totalpage']:
             self.__detail(code, date, page + 1)
