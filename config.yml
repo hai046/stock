@@ -7,8 +7,8 @@ sz002401:
       content: "你设置的警戒线到了"
 sh601816:
   - buy_price: 5.868
-    alert_up: 5
-    alert_down: 6.5
+    alert_up: 6.5
+    alert_down: 5
     alert_msg:
       wechat: 51945312-81f3-4cb7-bc09-c685e5783c61
       content: "你设置的警戒线到了"
