@@ -2,6 +2,8 @@ sz002401:
   - buy_price: 13.190
     alert_up: 15
     alert_down: 11
+    buy_count: 100
+    name: 中远海航
     alert_msg:
       wechat: 51945312-81f3-4cb7-bc09-c685e5783c61
       content: "你设置的警戒线到了"
@@ -9,13 +11,17 @@ sh601816:
   - buy_price: 5.868
     alert_up: 6.5
     alert_down: 5
+    buy_count: 400
+    name: 京沪高铁
     alert_msg:
       wechat: 51945312-81f3-4cb7-bc09-c685e5783c61
       content: "你设置的警戒线到了"
 sh588000:
   - buy_price: 1.440
     alert_up: 1.5
+    buy_count: 16800
     alert_down: 1.2
+    name: 科创50ETF
     alert_msg:
       wechat: 51945312-81f3-4cb7-bc09-c685e5783c61
       content: "你设置的警戒线到了"
@@ -23,6 +29,7 @@ sz000725:
   - buy_price: 6.383
     alert_up: 8.00
     alert_down: 6
+    buy_count: 1200
     alert_msg:
       wechat: 51945312-81f3-4cb7-bc09-c685e5783c61
       content: "你设置的警戒线到了"

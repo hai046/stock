@@ -92,7 +92,9 @@ class Shares:
         url = 'https://biz.finance.sina.com.cn/suggest/lookup_n.php?country=11&q=%s' % id
         print(url)
         msg += "\n\n[更多](%s)" % url
+        money_total = 0
         for conf in configs:
+
             if 'want_buy_price' in conf:
                 want_buy_price = conf['want_buy_price']
                 if 当前价格 <= want_buy_price:
@@ -100,22 +102,26 @@ class Shares:
                             conf['alert_msg']['content'], name, id, 当前价格, want_buy_price)):
                         self.__parse_img(url, conf)
             else:
+                count = conf['buy_count']
                 alert_up = conf['alert_up']
                 alert_down = conf['alert_down']
+                buy_price = conf['buy_price']
+                money = count * (当前价格 - buy_price)
+                money_total += money
                 if 当前价格 >= alert_up:
                     if self.__send_msg(conf, '## 股票：%s[%s]\n<font color="warning">涨了，涨了，涨了</font>\n> ' % (
-                            name, id) + msg):
+                            name, id) + msg + "\n收益：%.2d" % money):
                         self.__parse_img(url, conf)
                 elif 当前价格 < alert_down:
                     if self.__send_msg(conf,
                                        '## 股票：%s[%s]\n<font color="info">已经跌到你的设置的\n警戒线：%s\n当前价格：%s\n购买价格：%s</font>\n> ' % (
-                                               name, id, alert_down, 当前价格, conf['buy_price']) + msg):
+                                               name, id, alert_down, 当前价格, buy_price) + msg):
                         self.__parse_img(url, conf)
 
                 if self.today == '1516' or self.today == '0930' or self.today == '1130':
-                    buy_price = conf['buy_price']
+
                     if self.__send_msg(conf, "## 每日提示 购买价：%s，当前价：%s，收益率：%.2f%%\n%s" % (
-                            buy_price, 当前价格, 100 * (当前价格 - buy_price) / buy_price, msg)):
+                            buy_price, 当前价格, 100 * (当前价格 - buy_price) / buy_price, msg) + "\n收益：%.2d" % (money)):
                         self.__parse_img(url, conf)
         pass
 
